@@ -30,7 +30,7 @@ install:
 script:
   - docker-compose ps
   - docker ps -s
-  - pipenv run python commands.py test-cov
+  - pipenv run test-cov
 
 after_script:
   - docker-compose -f docker-compose.test.yml down

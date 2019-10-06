@@ -118,7 +118,7 @@ In this application, the following tests are made:
 In order to test the application with coverage, run the following command:
 
 ```
-python commands.py test-cov
+pipenv run test-cov
 ```
 
 Coverage results will appear after the tests are finished.
@@ -128,7 +128,7 @@ Coverage results will appear after the tests are finished.
 In order to test the application, with coverage on HTML pages, run the following command:
 
 ```
-python commands.py test-cov-html
+pipenv run test-cov-html
 ```
 
 Coverage results will appear inside the *cov_html* folder. Open the *index.html* with your favorite browser to see the results.
