@@ -1,0 +1,44 @@
+language: python
+
+sudo: false
+dist: xenial
+
+cache:
+  pip: true
+
+python:
+  - "3.7"
+
+env:
+  global:
+    - TEST_DOMAIN_IP=127.0.0.1
+    - PIPENV_DONT_LOAD_ENV=1
+    - PIPENV_VERBOSITY=-1
+
+services:
+  - docker
+  
+before_install:
+  - pip install --upgrade pip
+  - pip install pipenv
+  - pipenv install --dev
+
+install:
+  - docker-compose -f docker-compose.test.yml up --build -d
+  - sleep 10
+
+script:
+  - docker-compose ps
+  - docker ps -s
+  - pipenv run python commands.py test-cov
+
+after_script:
+  - docker-compose -f docker-compose.test.yml down
+
+after_success:
+  - pipenv run coveralls
+
+notifications:
+  email:
+    on_success: never
+    on_failure: never
