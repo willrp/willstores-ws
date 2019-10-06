@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+    willstores:
+        build: .
+        restart: unless-stopped
+        volumes:
+            - ./backend:/usr/src/backend
+        depends_on:
+            - es
+        ports:
+            - "8000:8000"
+        environment:
+            - TZ=Asia/Tokyo
+            - FLASK_APP=backend-dev.py
+            - FLASK_ENV=development
+            - ES_URL=http://es:9200
+            - ACCESS_TOKEN=TOKEN
+        command: flask run --host 0.0.0.0 --port 8000
+
+    es:
+        image: elasticsearch:5.4.3
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+        environment:
+            - discovery.type=single-node
+            - cluster.name=willbuyer-cluster
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
