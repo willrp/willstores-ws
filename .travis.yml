@@ -14,6 +14,7 @@ env:
     - TEST_DOMAIN_IP=127.0.0.1
     - PIPENV_DONT_LOAD_ENV=1
     - PIPENV_VERBOSITY=-1
+    - PIPENV_IGNORE_VIRTUALENVS=1
 
 services:
   - docker
