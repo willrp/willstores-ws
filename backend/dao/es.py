@@ -1,7 +1,7 @@
 import os
 from elasticsearch import Elasticsearch
 
-from backend.model import Product, Session
+from ..model import Product, Session
 
 
 class ES(object):

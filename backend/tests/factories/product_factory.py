@@ -1,7 +1,7 @@
 from factory import Factory, Sequence, List, build, Faker
 from factory.fuzzy import FuzzyChoice, FuzzyDecimal
 
-from backend.model import Price, Product
+from ...model import Price, Product
 
 
 class PriceFactory(Factory):
