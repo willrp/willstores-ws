@@ -1,7 +1,7 @@
 from factory import Factory, Sequence, Faker
 from factory.fuzzy import FuzzyChoice
 
-from backend.model import Session
+from ...model import Session
 
 
 class SessionFactory(Factory):
