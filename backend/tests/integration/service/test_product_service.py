@@ -7,6 +7,7 @@ from backend.model import Product
 from backend.tests.factories import ProductFactory
 from backend.errors.no_content_error import NoContentError
 from backend.errors.not_found_error import NotFoundError
+from backend.errors.request_error import ValidationError
 
 
 @pytest.fixture(scope="session")
@@ -15,12 +16,12 @@ def service():
     return service
 
 
-def test_product_service_total_products(service, es_object):
+def test_product_service_products_count(service, es_object):
     prod_list = ProductFactory.create_batch(2)
     [prod_obj.save(using=es_object.connection) for prod_obj in prod_list]
     Index("store", using=es_object.connection).refresh()
 
-    result = service.total_products()
+    result = service.products_count()
     assert result > 0
 
 
@@ -473,19 +474,23 @@ def test_product_service_select_by_id(service, es_object):
 
 
 def test_product_service_select_by_id_list(service, es_object):
+    price = {"outlet": 10.0, "retail": 20.0}
     id_list = []
     for i in range(3):
-        obj = ProductFactory.create()
+        obj = ProductFactory.create(price=price)
         obj.save(using=es_object.connection)
         id_list.append(obj.meta["id"])
 
     Index("store", using=es_object.connection).refresh()
 
-    results = service.select_by_id_list(id_list)
+    results, total = service.select_by_id_list(id_list)
     assert len(results) == len(id_list)
     for obj in results:
         assert type(obj) == Product
         assert obj.meta["id"] in id_list
+
+    assert total["outlet"] == 30.0
+    assert total["retail"] == 60.0
 
     with pytest.raises(NoContentError):
         service.select_by_id_list([])
@@ -494,3 +499,8 @@ def test_product_service_select_by_id_list(service, es_object):
 
     with pytest.raises(NoContentError):
         service.select_by_id_list(fake_id_list)
+
+    over_id_list = id_list + fake_id_list
+
+    with pytest.raises(ValidationError):
+        service.select_by_id_list(over_id_list)

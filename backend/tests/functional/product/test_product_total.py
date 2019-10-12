@@ -5,7 +5,7 @@ from uuid import uuid4
 from json.decoder import JSONDecodeError
 
 from backend.tests.factories import ProductFactory
-from backend.util.response.products_list import ProductsListSchema
+from backend.util.response.products_total import ProductTotalSchema
 from backend.util.response.error import ErrorSchema
 
 
@@ -18,21 +18,20 @@ def test_product_list(domain_url, es_object, token_session):
     prod_id_list = [p.meta["id"] for p in prod_list]
 
     response = token_session.post(
-        domain_url + "/api/product/list",
+        domain_url + "/api/product/total",
         json={
             "id_list": prod_id_list,
         }
     )
 
     data = response.json()
-    ProductsListSchema().load(data)
+    ProductTotalSchema().load(data)
     assert response.status_code == 200
-    assert len(data["products"]) == 2
     assert data["total"]["outlet"] == 20.0
     assert data["total"]["retail"] == 40.0
 
     response = token_session.post(
-        domain_url + "/api/product/list",
+        domain_url + "/api/product/total",
         json={
             "id_list": [str(uuid4()) for i in range(2)]
         }
@@ -44,7 +43,7 @@ def test_product_list(domain_url, es_object, token_session):
     assert response.status_code == 204
 
     response = token_session.post(
-        domain_url + "/api/product/list",
+        domain_url + "/api/product/total",
         json={
             "id_list": prod_id_list.append(str(uuid4())),
         }
@@ -57,7 +56,7 @@ def test_product_list(domain_url, es_object, token_session):
 
 def test_product_list_unauthorized(domain_url):
     response = requests.post(
-        domain_url + "/api/product/list",
+        domain_url + "/api/product/total",
     )
 
     data = response.json()

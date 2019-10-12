@@ -14,7 +14,7 @@ class Price(InnerObjectWrapper):
 
     def get_dict(self) -> dict:
         return {
-            "outlet": format(self.outlet),
-            "retail": format(self.retail),
+            "outlet": self.outlet,
+            "retail": self.retail,
             "symbol": "£"
         }

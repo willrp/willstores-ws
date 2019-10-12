@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
 
 
-class TotalProductsSchema(Schema):
+class ProductsCountSchema(Schema):
     count = fields.Integer(required=True)

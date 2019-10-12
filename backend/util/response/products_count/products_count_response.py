@@ -1,9 +1,9 @@
 from flask_restplus import fields
 
-from .total_products_schema import TotalProductsSchema
+from .products_count_schema import ProductsCountSchema
 
 
-class TotalProductsResponse(object):
+class ProductsCountResponse(object):
     @staticmethod
     def get_model(api, name):
         return api.model(
@@ -15,6 +15,6 @@ class TotalProductsResponse(object):
 
     @staticmethod
     def marshall_json(data_out):
-        schema = TotalProductsSchema()
+        schema = ProductsCountSchema()
         jsonsend = schema.load(data_out)
         return jsonsend
