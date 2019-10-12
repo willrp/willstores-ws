@@ -2,7 +2,7 @@ from flask_restplus import Namespace, Resource
 
 from backend.service import ProductService
 from backend.util.request.product_list_request import ProductListRequest
-from backend.util.response.search_products_results import SearchProductsResultsResponse
+from backend.util.response.products_list import ProductsListResponse
 from backend.util.response.error import ErrorResponse
 from backend.controller import ErrorHandler, auth_required
 
@@ -10,7 +10,7 @@ from backend.controller import ErrorHandler, auth_required
 productListNS = Namespace("Product", description="Product related operations.")
 
 REQUESTMODEL = ProductListRequest.get_model(productListNS, "ProductListRequest")
-RESPONSEMODEL = SearchProductsResultsResponse.get_model(productListNS, "SearchProductsResultsResponse")
+RESPONSEMODEL = ProductsListResponse.get_model(productListNS, "ProductsListResponse")
 ERRORMODEL = ErrorResponse.get_model(productListNS, "ErrorResponse")
 
 
@@ -26,6 +26,7 @@ class ProductListController(Resource):
     @productListNS.expect(REQUESTMODEL)
     @productListNS.response(200, "Success", RESPONSEMODEL)
     @productListNS.response(204, "No content", ERRORMODEL)
+    @productListNS.response(400, "Bad Request", ERRORMODEL)
     @productListNS.response(401, "Unauthorized", ERRORMODEL)
     @productListNS.response(500, "Unexpected Error", ERRORMODEL)
     @productListNS.response(504, "Error while accessing the gateway server", ERRORMODEL)
@@ -33,10 +34,11 @@ class ProductListController(Resource):
         """Product information list."""
         try:
             in_data = ProductListRequest.parse_json()
-            products = self.__productservice.select_by_id_list(**in_data)
-            jsonsend = SearchProductsResultsResponse.marshall_json(
+            products, total = self.__productservice.select_by_id_list(**in_data)
+            jsonsend = ProductsListResponse.marshall_json(
                 {
-                    "products": [p.get_dict_min() for p in products]
+                    "products": [p.get_dict_min() for p in products],
+                    "total": total
                 }
             )
             return jsonsend

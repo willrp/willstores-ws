@@ -1,14 +1,14 @@
 from flask_restplus import Namespace, Resource
 
 from backend.service import ProductService
-from backend.util.response.total_products import TotalProductsResponse
+from backend.util.response.products_count import ProductsCountResponse
 from backend.util.response.error import ErrorResponse
 from backend.controller import ErrorHandler, auth_required
 
 
 startNS = Namespace("Start", description="Initial operations.")
 
-RESPONSEMODEL = TotalProductsResponse.get_model(startNS, "TotalProductsResponse")
+RESPONSEMODEL = ProductsCountResponse.get_model(startNS, "ProductsCountResponse")
 ERRORMODEL = ErrorResponse.get_model(startNS, "ErrorResponse")
 
 
@@ -27,8 +27,8 @@ class StartController(Resource):
     def get(self):
         """Total products registered."""
         try:
-            numproducts = self.__productservice.total_products()
-            jsonsend = TotalProductsResponse.marshall_json({"count": numproducts})
+            numproducts = self.__productservice.products_count()
+            jsonsend = ProductsCountResponse.marshall_json({"count": numproducts})
             return jsonsend
         except Exception as error:
             return ErrorHandler(error).handle_error()

@@ -2,7 +2,7 @@ import requests
 from elasticsearch_dsl import Index
 
 from backend.tests.factories import ProductFactory
-from backend.util.response.total_products import TotalProductsSchema
+from backend.util.response.products_count import ProductsCountSchema
 from backend.util.response.error import ErrorSchema
 
 
@@ -16,7 +16,7 @@ def test_start(domain_url, es_object, token_session):
     )
 
     data = response.json()
-    TotalProductsSchema().load(data)
+    ProductsCountSchema().load(data)
     assert response.status_code == 200
     assert data["count"] > 0
 

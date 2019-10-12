@@ -5,6 +5,7 @@ from elasticsearch_dsl import Search
 from backend.service import ProductService
 from backend.errors.no_content_error import NoContentError
 from backend.errors.not_found_error import NotFoundError
+from backend.errors.request_error import ValidationError
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -18,11 +19,11 @@ def service():
     return service
 
 
-def test_product_service_total_products(mocker, service):
+def test_product_service_products_count(mocker, service):
     mock_execute = MagicMock()
     mock_execute.hits.total = 15
     with mocker.patch.object(Search, "execute", return_value=mock_execute):
-        result = service.total_products()
+        result = service.products_count()
         assert result == 15
 
 
@@ -139,9 +140,15 @@ def test_product_service_select_by_id(mocker, service):
 
 
 def test_product_service_select_by_id_list(mocker, service):
-    with mocker.patch.object(Search, "execute", return_value=[MagicMock(autospec=True) for i in range(2)]):
-        results = service.select_by_id_list(["id", "id"])
+    mock_execute = MagicMock()
+    mock_execute.meta = {"id": "id"}
+    mock_execute.price = MagicMock(outlet=10.0, retail=20.0)
+    mock_execute.price.get_dict.return_value = {"outlet": 10.0, "retail": 20.0, "symbol": "£"}
+    with mocker.patch.object(Search, "execute", return_value=[mock_execute for i in range(2)]):
+        results, total = service.select_by_id_list(["id", "id"])
         assert len(results) == 2
+        assert total["outlet"] == 20.0
+        assert total["retail"] == 40.0
 
         results = service.select_by_id_list([])
         assert len(results) == 2
@@ -149,3 +156,7 @@ def test_product_service_select_by_id_list(mocker, service):
     with mocker.patch.object(Search, "execute", return_value=[]):
         with pytest.raises(NoContentError):
             service.select_by_id_list([])
+
+    with mocker.patch.object(Search, "execute", return_value=[mock_execute for i in range(2)]):
+        with pytest.raises(ValidationError):
+            service.select_by_id_list(["notid", "notid"])

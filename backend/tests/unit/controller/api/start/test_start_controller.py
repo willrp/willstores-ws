@@ -4,7 +4,7 @@ from elasticsearch import ElasticsearchException
 from elasticsearch_dsl.exceptions import ElasticsearchDslException
 
 from backend.service import ProductService
-from backend.util.response.total_products import TotalProductsSchema
+from backend.util.response.products_count import ProductsCountSchema
 from backend.util.response.error import ErrorSchema
 
 
@@ -14,14 +14,14 @@ def controller_mocker(mocker):
 
 
 def test_start_controller(mocker, login_disabled_app):
-    with mocker.patch.object(ProductService, "total_products", return_value=5):
+    with mocker.patch.object(ProductService, "products_count", return_value=5):
         with login_disabled_app.test_client() as client:
             response = client.get(
                 "api/start"
             )
 
         data = json.loads(response.data)
-        TotalProductsSchema().load(data)
+        ProductsCountSchema().load(data)
 
         assert response.status_code == 200
 
@@ -29,9 +29,9 @@ def test_start_controller(mocker, login_disabled_app):
 @pytest.mark.parametrize(
     "method,http_method,test_url,error,status_code",
     [
-        ("total_products", "GET", "/api/start", ElasticsearchException(), 504),
-        ("total_products", "GET", "/api/start", ElasticsearchDslException(), 504),
-        ("total_products", "GET", "/api/start", Exception(), 500)
+        ("products_count", "GET", "/api/start", ElasticsearchException(), 504),
+        ("products_count", "GET", "/api/start", ElasticsearchDslException(), 504),
+        ("products_count", "GET", "/api/start", Exception(), 500)
     ]
 )
 def test_start_controller_error(mocker, get_request_function, method, http_method, test_url, error, status_code):

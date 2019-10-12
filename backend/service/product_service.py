@@ -1,17 +1,18 @@
-from typing import List
+from typing import List, Tuple
 from elasticsearch_dsl import Search, Q
 
 from backend.model import Product
 from backend.dao.es import ES
 from backend.errors.no_content_error import NoContentError
 from backend.errors.not_found_error import NotFoundError
+from backend.errors.request_error import ValidationError
 
 
 class ProductService(object):
     def __init__(self):
         self.es = ES().connection
 
-    def total_products(self) -> int:
+    def products_count(self) -> int:
         s = Product.search(using=self.es)
         s = s.filter("match_all")[:0]
         s = s.query({"range": {"price.retail": {"gt": 0.0}}}).query({"range": {"price.outlet": {"gt": 0.0}}})
@@ -125,7 +126,7 @@ class ProductService(object):
         else:
             return results[0]
 
-    def select_by_id_list(self, id_list) -> List[Product]:
+    def select_by_id_list(self, id_list) -> Tuple[List[Product], dict]:
         s = Product.search(using=self.es)
         s = s[:len(id_list)]
         s = s.filter("terms", _id=id_list)
@@ -133,4 +134,14 @@ class ProductService(object):
         if not results:
             raise NoContentError()
         else:
-            return results
+            products_id = [product.meta["id"] for product in results]
+            for p_id in id_list:
+                if p_id not in products_id:
+                    raise ValidationError("Product id '%s' not registered." % p_id)
+
+            total = results[0].price.get_dict()
+            for product in results[1:]:
+                total["outlet"] += product.price.outlet
+                total["retail"] += product.price.retail
+
+            return results, total
