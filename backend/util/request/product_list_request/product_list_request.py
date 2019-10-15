@@ -1,6 +1,7 @@
 from flask import request
 from flask_restplus import fields
 
+from ..models.product_item import ProductItemRequest
 from .product_list_schema import ProductListSchema
 
 
@@ -10,7 +11,7 @@ class ProductListRequest(object):
         return api.model(
             name,
             {
-                "id_list": fields.List(fields.String(required=True, description="Product ID list"), required=True)
+                "item_list": fields.List(fields.Nested(ProductItemRequest.get_model(api, "ProductItemRequest"), required=True), required=True)
             }
         )
 

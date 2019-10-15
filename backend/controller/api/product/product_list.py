@@ -31,10 +31,10 @@ class ProductListController(Resource):
     @productListNS.response(500, "Unexpected Error", ERRORMODEL)
     @productListNS.response(504, "Error while accessing the gateway server", ERRORMODEL)
     def post(self):
-        """Product information list."""
+        """Product information list with total price."""
         try:
             in_data = ProductListRequest.parse_json()
-            products, total = self.__productservice.select_by_id_list(**in_data)
+            products, total = self.__productservice.select_by_item_list(**in_data)
             jsonsend = ProductsListResponse.marshall_json(
                 {
                     "products": [p.get_dict_min() for p in products],

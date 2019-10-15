@@ -15,27 +15,29 @@ def test_product_total_controller(token_app, es_object):
     [prod_obj.save(using=es_object.connection) for prod_obj in prod_list]
     Index("store", using=es_object.connection).refresh()
 
-    prod_id_list = [p.meta["id"] for p in prod_list]
+    prod_item_list = [{"item_id": p.meta["id"], "amount": 3} for p in prod_list]
 
     with token_app.test_client() as client:
         response = client.post(
             "api/product/total",
             json={
-                "id_list": prod_id_list,
+                "item_list": prod_item_list,
             }
         )
 
     data = json.loads(response.data)
     ProductTotalSchema().load(data)
     assert response.status_code == 200
-    assert data["total"]["outlet"] == 20.0
-    assert data["total"]["retail"] == 40.0
+    assert data["total"]["outlet"] == 60.0
+    assert data["total"]["retail"] == 120.0
+
+    fake_item_list = [{"item_id": str(uuid4()), "amount": 1} for p in range(2)]
 
     with token_app.test_client() as client:
         response = client.post(
             "api/product/total",
             json={
-                "id_list": [str(uuid4()) for i in range(2)]
+                "item_list": fake_item_list
             }
         )
 
@@ -48,7 +50,7 @@ def test_product_total_controller(token_app, es_object):
         response = client.post(
             "api/product/total",
             json={
-                "id_list": prod_id_list.append(str(uuid4())),
+                "item_list": prod_item_list + fake_item_list,
             }
         )
 

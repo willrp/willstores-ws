@@ -139,24 +139,24 @@ def test_product_service_select_by_id(mocker, service):
             service.select_by_id("id")
 
 
-def test_product_service_select_by_id_list(mocker, service):
+def test_product_service_select_by_item_list(mocker, service):
     mock_execute = MagicMock()
     mock_execute.meta = {"id": "id"}
     mock_execute.price = MagicMock(outlet=10.0, retail=20.0)
     mock_execute.price.get_dict.return_value = {"outlet": 10.0, "retail": 20.0, "symbol": "£"}
     with mocker.patch.object(Search, "execute", return_value=[mock_execute for i in range(2)]):
-        results, total = service.select_by_id_list(["id", "id"])
+        results, total = service.select_by_item_list([{"item_id": "id", "amount": 2}, {"item_id": "id", "amount": 3}])
         assert len(results) == 2
-        assert total["outlet"] == 20.0
-        assert total["retail"] == 40.0
+        assert total["outlet"] == 50.0
+        assert total["retail"] == 100.0
 
-        results = service.select_by_id_list([])
+        results = service.select_by_item_list([])
         assert len(results) == 2
 
     with mocker.patch.object(Search, "execute", return_value=[]):
         with pytest.raises(NoContentError):
-            service.select_by_id_list([])
+            service.select_by_item_list([])
 
     with mocker.patch.object(Search, "execute", return_value=[mock_execute for i in range(2)]):
         with pytest.raises(ValidationError):
-            service.select_by_id_list(["notid", "notid"])
+            service.select_by_item_list([{"item_id": "notid", "amount": 2}, {"item_id": "notid", "amount": 3}])

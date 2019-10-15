@@ -473,34 +473,35 @@ def test_product_service_select_by_id(service, es_object):
         service.select_by_id(fake_id)
 
 
-def test_product_service_select_by_id_list(service, es_object):
+def test_product_service_select_by_item_list(service, es_object):
     price = {"outlet": 10.0, "retail": 20.0}
-    id_list = []
+    item_list = []
     for i in range(3):
         obj = ProductFactory.create(price=price)
         obj.save(using=es_object.connection)
-        id_list.append(obj.meta["id"])
+        item_list.append({"item_id": obj.meta["id"], "amount": i+1})
 
     Index("store", using=es_object.connection).refresh()
 
-    results, total = service.select_by_id_list(id_list)
-    assert len(results) == len(id_list)
+    results, total = service.select_by_item_list(item_list)
+    assert len(results) == len(item_list)
+    item_id_list = [item["item_id"] for item in item_list]
     for obj in results:
         assert type(obj) == Product
-        assert obj.meta["id"] in id_list
+        assert obj.meta["id"] in item_id_list
 
-    assert total["outlet"] == 30.0
-    assert total["retail"] == 60.0
-
-    with pytest.raises(NoContentError):
-        service.select_by_id_list([])
-
-    fake_id_list = [str(uuid4()) for x in range(2)]
+    assert total["outlet"] == 60.0
+    assert total["retail"] == 120.0
 
     with pytest.raises(NoContentError):
-        service.select_by_id_list(fake_id_list)
+        service.select_by_item_list([])
 
-    over_id_list = id_list + fake_id_list
+    fake_item_list = [{"item_id": str(uuid4()), "amount": 2} for x in range(2)]
+
+    with pytest.raises(NoContentError):
+        service.select_by_item_list(fake_item_list)
+
+    over_item_list = item_list + fake_item_list
 
     with pytest.raises(ValidationError):
-        service.select_by_id_list(over_id_list)
+        service.select_by_item_list(over_item_list)
