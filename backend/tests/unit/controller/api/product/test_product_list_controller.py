@@ -16,7 +16,10 @@ from backend.errors.request_error import ValidationError
 @pytest.fixture(scope="module")
 def request_json():
     return {
-        "id_list": ["id", "id"]
+        "item_list": [
+            {"item_id": "id", "amount": 2},
+            {"item_id": "id", "amount": 3}
+        ]
     }
 
 
@@ -43,7 +46,7 @@ def controller_mocker(mocker):
 def test_product_list_controller(mocker, login_disabled_app, request_json, product_response_json):
     mock_product = MagicMock()
     mock_product.get_dict_min.return_value = product_response_json
-    with mocker.patch.object(ProductService, "select_by_id_list", return_value=([mock_product], product_response_json["price"])):
+    with mocker.patch.object(ProductService, "select_by_item_list", return_value=([mock_product], product_response_json["price"])):
         with login_disabled_app.test_client() as client:
             response = client.post(
                 "api/product/list",
@@ -78,7 +81,7 @@ def test_product_list_controller_invalid_json(mocker, login_disabled_app, reques
     assert response.status_code == 400
 
     invalid_list = deepcopy(request_json)
-    invalid_list.update(id_list="id1")
+    invalid_list.update(item_list="id1")
 
     with login_disabled_app.test_client() as client:
         response = client.post(
@@ -91,7 +94,7 @@ def test_product_list_controller_invalid_json(mocker, login_disabled_app, reques
     assert response.status_code == 400
 
     empty_list = deepcopy(request_json)
-    empty_list.update(id_list=[])
+    empty_list.update(item_list=[])
 
     with login_disabled_app.test_client() as client:
         response = client.post(
@@ -103,15 +106,54 @@ def test_product_list_controller_invalid_json(mocker, login_disabled_app, reques
     ErrorSchema().load(data)
     assert response.status_code == 400
 
+    no_item_id = deepcopy(request_json)
+    del no_item_id["item_list"][0]["item_id"]
+
+    with login_disabled_app.test_client() as client:
+        response = client.post(
+            "api/product/list",
+            json=no_item_id
+        )
+
+    data = json.loads(response.data)
+    ErrorSchema().load(data)
+    assert response.status_code == 400
+
+    no_amount = deepcopy(request_json)
+    del no_amount["item_list"][0]["amount"]
+
+    with login_disabled_app.test_client() as client:
+        response = client.post(
+            "api/product/list",
+            json=no_amount
+        )
+
+    data = json.loads(response.data)
+    ErrorSchema().load(data)
+    assert response.status_code == 400
+
+    invalid_amount = deepcopy(request_json)
+    invalid_amount["item_list"][0].update(amount=0)
+
+    with login_disabled_app.test_client() as client:
+        response = client.post(
+            "api/product/list",
+            json=invalid_amount
+        )
+
+    data = json.loads(response.data)
+    ErrorSchema().load(data)
+    assert response.status_code == 400
+
 
 @pytest.mark.parametrize(
     "method,http_method,test_url,error,status_code",
     [
-        ("select_by_id_list", "POST", "/api/product/list", NoContentError(), 204),
-        ("select_by_id_list", "POST", "/api/product/list", ValidationError("test"), 400),
-        ("select_by_id_list", "POST", "/api/product/list", ElasticsearchException(), 504),
-        ("select_by_id_list", "POST", "/api/product/list", ElasticsearchDslException(), 504),
-        ("select_by_id_list", "POST", "/api/product/list", Exception(), 500)
+        ("select_by_item_list", "POST", "/api/product/list", NoContentError(), 204),
+        ("select_by_item_list", "POST", "/api/product/list", ValidationError("test"), 400),
+        ("select_by_item_list", "POST", "/api/product/list", ElasticsearchException(), 504),
+        ("select_by_item_list", "POST", "/api/product/list", ElasticsearchDslException(), 504),
+        ("select_by_item_list", "POST", "/api/product/list", Exception(), 500)
     ]
 )
 def test_kind_products_controller_error(mocker, get_request_function, request_json, method, http_method, test_url, error, status_code):

@@ -34,7 +34,7 @@ class ProductTotalController(Resource):
         """Product list total price."""
         try:
             in_data = ProductListRequest.parse_json()
-            _, total = self.__productservice.select_by_id_list(**in_data)
+            _, total = self.__productservice.select_by_item_list(**in_data)
             jsonsend = ProductTotalResponse.marshall_json(
                 {
                     "total": total

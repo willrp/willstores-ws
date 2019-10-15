@@ -126,22 +126,26 @@ class ProductService(object):
         else:
             return results[0]
 
-    def select_by_id_list(self, id_list) -> Tuple[List[Product], dict]:
+    def select_by_item_list(self, item_list) -> Tuple[List[Product], dict]:
+        item_id_list = [item["item_id"] for item in item_list]
         s = Product.search(using=self.es)
-        s = s[:len(id_list)]
-        s = s.filter("terms", _id=id_list)
+        s = s[:len(item_list)]
+        s = s.filter("terms", _id=item_id_list)
         results = s.execute()
         if not results:
             raise NoContentError()
         else:
             products_id = [product.meta["id"] for product in results]
-            for p_id in id_list:
+            for p_id in item_id_list:
                 if p_id not in products_id:
                     raise ValidationError("Product id '%s' not registered." % p_id)
 
-            total = results[0].price.get_dict()
-            for product in results[1:]:
-                total["outlet"] += product.price.outlet
-                total["retail"] += product.price.retail
+            total = {"outlet": 0.0, "retail": 0.0, "symbol": results[0].price.get_dict()["symbol"]}
+
+            for item in item_list:
+                product = next(p for p in results if p.meta["id"] == item["item_id"])
+                amount = item["amount"]
+                total["outlet"] += product.price.outlet * amount
+                total["retail"] += product.price.retail * amount
 
             return results, total
