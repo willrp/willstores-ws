@@ -1,8 +1,6 @@
-import pytest
 import requests
 from elasticsearch_dsl import Index
 from uuid import uuid4
-from json.decoder import JSONDecodeError
 
 from backend.tests.factories import ProductFactory
 from backend.util.response.products_total import ProductTotalSchema
@@ -31,18 +29,6 @@ def test_product_list(domain_url, es_object, token_session):
     assert data["total"]["retail"] == 120.0
 
     fake_item_list = [{"item_id": str(uuid4()), "amount": 1} for p in range(2)]
-
-    response = token_session.post(
-        domain_url + "/api/product/total",
-        json={
-            "item_list": fake_item_list
-        }
-    )
-
-    with pytest.raises(JSONDecodeError):
-        response.json()
-
-    assert response.status_code == 204
 
     response = token_session.post(
         domain_url + "/api/product/total",

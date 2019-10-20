@@ -25,7 +25,6 @@ class ProductTotalController(Resource):
     @productTotalNS.param("payload", description="Required", _in="body", required=True)
     @productTotalNS.expect(REQUESTMODEL)
     @productTotalNS.response(200, "Success", RESPONSEMODEL)
-    @productTotalNS.response(204, "No content", ERRORMODEL)
     @productTotalNS.response(401, "Unauthorized", ERRORMODEL)
     @productTotalNS.response(400, "Bad Request", ERRORMODEL)
     @productTotalNS.response(500, "Unexpected Error", ERRORMODEL)

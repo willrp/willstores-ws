@@ -132,20 +132,17 @@ class ProductService(object):
         s = s[:len(item_list)]
         s = s.filter("terms", _id=item_id_list)
         results = s.execute()
-        if not results:
-            raise NoContentError()
-        else:
-            products_id = [product.meta["id"] for product in results]
-            for p_id in item_id_list:
-                if p_id not in products_id:
-                    raise ValidationError("Product id '%s' not registered." % p_id)
+        products_id = [product.meta["id"] for product in results]
+        for p_id in item_id_list:
+            if p_id not in products_id:
+                raise ValidationError("Product id '%s' not registered." % p_id)
 
-            total = {"outlet": 0.0, "retail": 0.0, "symbol": results[0].price.get_dict()["symbol"]}
+        total = {"outlet": 0.0, "retail": 0.0, "symbol": results[0].price.get_dict()["symbol"]}
 
-            for item in item_list:
-                product = next(p for p in results if p.meta["id"] == item["item_id"])
-                amount = item["amount"]
-                total["outlet"] += product.price.outlet * amount
-                total["retail"] += product.price.retail * amount
+        for item in item_list:
+            product = next(p for p in results if p.meta["id"] == item["item_id"])
+            amount = item["amount"]
+            total["outlet"] += product.price.outlet * amount
+            total["retail"] += product.price.retail * amount
 
-            return results, total
+        return results, total

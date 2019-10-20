@@ -493,14 +493,7 @@ def test_product_service_select_by_item_list(service, es_object):
     assert total["outlet"] == 60.0
     assert total["retail"] == 120.0
 
-    with pytest.raises(NoContentError):
-        service.select_by_item_list([])
-
     fake_item_list = [{"item_id": str(uuid4()), "amount": 2} for x in range(2)]
-
-    with pytest.raises(NoContentError):
-        service.select_by_item_list(fake_item_list)
-
     over_item_list = item_list + fake_item_list
 
     with pytest.raises(ValidationError):

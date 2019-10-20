@@ -1,8 +1,6 @@
-import pytest
 from flask import json
 from elasticsearch_dsl import Index
 from uuid import uuid4
-from json.decoder import JSONDecodeError
 
 from backend.tests.factories import ProductFactory
 from backend.util.response.products_total import ProductTotalSchema
@@ -32,19 +30,6 @@ def test_product_total_controller(token_app, es_object):
     assert data["total"]["retail"] == 120.0
 
     fake_item_list = [{"item_id": str(uuid4()), "amount": 1} for p in range(2)]
-
-    with token_app.test_client() as client:
-        response = client.post(
-            "api/product/total",
-            json={
-                "item_list": fake_item_list
-            }
-        )
-
-    with pytest.raises(JSONDecodeError):
-        json.loads(response.data)
-
-    assert response.status_code == 204
 
     with token_app.test_client() as client:
         response = client.post(
