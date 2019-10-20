@@ -142,7 +142,7 @@ class ProductService(object):
         for item in item_list:
             product = next(p for p in results if p.meta["id"] == item["item_id"])
             amount = item["amount"]
-            total["outlet"] += product.price.outlet * amount
-            total["retail"] += product.price.retail * amount
+            total["outlet"] += round(product.price.outlet * amount, 2)
+            total["retail"] += round(product.price.retail * amount, 2)
 
         return results, total
