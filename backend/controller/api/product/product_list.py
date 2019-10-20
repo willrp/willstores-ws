@@ -25,7 +25,6 @@ class ProductListController(Resource):
     @productListNS.param("payload", description="Required", _in="body", required=True)
     @productListNS.expect(REQUESTMODEL)
     @productListNS.response(200, "Success", RESPONSEMODEL)
-    @productListNS.response(204, "No content", ERRORMODEL)
     @productListNS.response(400, "Bad Request", ERRORMODEL)
     @productListNS.response(401, "Unauthorized", ERRORMODEL)
     @productListNS.response(500, "Unexpected Error", ERRORMODEL)

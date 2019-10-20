@@ -148,7 +148,6 @@ def test_product_total_controller_invalid_json(mocker, login_disabled_app, reque
 @pytest.mark.parametrize(
     "method,http_method,test_url,error,status_code",
     [
-        ("select_by_item_list", "POST", "/api/product/total", NoContentError(), 204),
         ("select_by_item_list", "POST", "/api/product/total", ValidationError("test"), 400),
         ("select_by_item_list", "POST", "/api/product/total", ElasticsearchException(), 504),
         ("select_by_item_list", "POST", "/api/product/total", ElasticsearchDslException(), 504),
@@ -164,11 +163,7 @@ def test_kind_products_controller_error(mocker, get_request_function, request_js
             json=request_json
         )
 
-        if status_code == 204:
-            with pytest.raises(JSONDecodeError):
-                json.loads(response.data)
-        else:
-            data = json.loads(response.data)
-            ErrorSchema().load(data)
+        data = json.loads(response.data)
+        ErrorSchema().load(data)
 
         assert response.status_code == status_code

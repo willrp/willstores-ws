@@ -153,10 +153,6 @@ def test_product_service_select_by_item_list(mocker, service):
         results = service.select_by_item_list([])
         assert len(results) == 2
 
-    with mocker.patch.object(Search, "execute", return_value=[]):
-        with pytest.raises(NoContentError):
-            service.select_by_item_list([])
-
     with mocker.patch.object(Search, "execute", return_value=[mock_execute for i in range(2)]):
         with pytest.raises(ValidationError):
             service.select_by_item_list([{"item_id": "notid", "amount": 2}, {"item_id": "notid", "amount": 3}])
