@@ -80,7 +80,7 @@ def test_brand_controller(mocker, login_disabled_app, request_json, brands_respo
                     SearchResultsSchema().load(data)
                     assert response.status_code == 200
                     assert data["total"] == 10
-                    assert data["pricerange"] == request_json["pricerange"]
+                    assert data["pricerange"] == pricerange_response_json
 
 
 def test_brand_controller_invalid_json(mocker, login_disabled_app, request_json):
