@@ -38,11 +38,7 @@ class BrandController(Resource):
             total = self.__productservice.get_total(brand=brand, **in_data)
             brands = self.__productservice.select_brands(brand=brand, **in_data)
             kinds = self.__productservice.select_kinds(brand=brand, **in_data)
-
-            if "pricerange" in in_data:
-                pricerange = in_data["pricerange"]
-            else:
-                pricerange = self.__productservice.select_pricerange(brand=brand)
+            pricerange = self.__productservice.select_pricerange(brand=brand)
 
             jsonsend = SearchResultsResponse.marshall_json(
                 {

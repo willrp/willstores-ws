@@ -38,11 +38,7 @@ class SearchController(Resource):
             total = self.__productservice.get_total(query=query, **in_data)
             brands = self.__productservice.select_brands(query=query, **in_data)
             kinds = self.__productservice.select_kinds(query=query, **in_data)
-
-            if "pricerange" in in_data:
-                pricerange = in_data["pricerange"]
-            else:
-                pricerange = self.__productservice.select_pricerange(query=query)
+            pricerange = self.__productservice.select_pricerange(query=query)
 
             jsonsend = SearchResultsResponse.marshall_json(
                 {

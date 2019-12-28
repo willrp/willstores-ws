@@ -42,11 +42,7 @@ class SessionController(Resource):
             total = self.__productservice.get_total(sessionid=sessionid, **in_data)
             brands = self.__productservice.select_brands(sessionid=sessionid, **in_data)
             kinds = self.__productservice.select_kinds(sessionid=sessionid, **in_data)
-
-            if "pricerange" in in_data:
-                pricerange = in_data["pricerange"]
-            else:
-                pricerange = self.__productservice.select_pricerange(sessionid=sessionid)
+            pricerange = self.__productservice.select_pricerange(sessionid=sessionid)
 
             jsonsend = SessionResultsResponse.marshall_json(
                 {

@@ -38,11 +38,7 @@ class KindController(Resource):
             total = self.__productservice.get_total(kind=kind, **in_data)
             brands = self.__productservice.select_brands(kind=kind, **in_data)
             kinds = self.__productservice.select_kinds(kind=kind, **in_data)
-
-            if "pricerange" in in_data:
-                pricerange = in_data["pricerange"]
-            else:
-                pricerange = self.__productservice.select_pricerange(kind=kind)
+            pricerange = self.__productservice.select_pricerange(kind=kind)
 
             jsonsend = SearchResultsResponse.marshall_json(
                 {
